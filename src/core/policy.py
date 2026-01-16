@@ -1,31 +1,26 @@
-"""
-CORE POLICY ENGINE
-Authority: Arrêté du 17 novembre 2025 (NOR: ECOI2530768A)
-Compliance Target: Article 27, Loi n° 2024-449.
-"""
-
 from enum import Enum
 from decimal import Decimal
 from typing import Final
+from pydantic import BaseModel
 
 class LegalReference(Enum):
     SREN_ART_27 = "LOI_2024_449_ART_27"
-    ARRETE_EGRESS = "NOR_ECOI2530768A"  # Arrêté du 17/11/2025
-    GDPR_PORTABILITY = "RGPD_ART_20"
+    ARRETE_EGRESS = "NOR_ECOI2530768A"
 
-# Conformément au JORF n°0281 du 30/11/2025
-# Montant maximal autorisé pour les frais de transfert
+class EnforcementMode(Enum):
+    STRICT = "BLOCK_ALL_FEES"
+    ADVISORY = "LOG_AND_PROCEED"
+
+class SRENConfig(BaseModel):
+    mode: EnforcementMode = EnforcementMode.STRICT
+    allow_value_added_services: bool = False
+
 STATUTORY_MAX_EGRESS_FEE: Final[Decimal] = Decimal("0.00")
 
 class DataSovereigntyViolation(Exception):
-    """
-    Raised when an infrastructure component violates French Digital Sovereignty Laws.
-    Target: Blocking non-compliant UCP streams.
-    """
     def __init__(self, provider: str, cost: Decimal, context: str):
         self.message = (
             f"[VIOLATION] Provider {provider} attempts to charge {cost} EUR/GB. "
-            f"Limit is {STATUTORY_MAX_EGRESS_FEE} EUR per {LegalReference.ARRETE_EGRESS.value}. "
-            f"Context: {context}"
+            f"Limit is {STATUTORY_MAX_EGRESS_FEE} EUR per {LegalReference.ARRETE_EGRESS.value}."
         )
         super().__init__(self.message)
