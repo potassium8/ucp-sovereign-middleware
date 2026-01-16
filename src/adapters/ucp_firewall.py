@@ -21,34 +21,30 @@ class SRENComplianceFilter:
     async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig = SRENConfig()) -> bool:
         tx_id = tx.transaction_id
         
-        logger.info(f"AUDIT_EVENT|v={SREN_ENGINE_VERSION}|tx={tx_id}|agent={agent.agent_id}|reg={getattr(agent, 'region', 'EU-DEFAULT')}")
+        logger.info(f"AUDIT|v={SREN_ENGINE_VERSION}|tx_hash={hash(tx_id)}|prov={agent.provider}")
 
         try:
-            if not isinstance(tx.payload_size_mb, (int, float, Decimal)):
-                raise TypeError("NON_NUMERIC_PAYLOAD")
-            
             with decimal.localcontext() as ctx:
                 ctx.prec = 28
                 ctx.rounding = decimal.ROUND_HALF_UP
                 
-                raw_val = Decimal(str(tx.payload_size_mb))
-                if raw_val < 0 or raw_val > 1_000_000_000:
-                    raise ValueError("OUT_OF_BOUNDS_PAYLOAD")
+                if tx.payload_size_mb < 0:
+                    raise ValueError("NEGATIVE_PAYLOAD")
 
                 current_rate = await self.billing_service.get_current_egress_rate()
-                size_gb = (raw_val * UCP_PROTOCOL_OVERHEAD) / Decimal("1024")
+                
+                size_gb = (tx.payload_size_mb * UCP_PROTOCOL_OVERHEAD) / Decimal("1024")
                 projected_cost = (size_gb * current_rate).quantize(Decimal("0.0001"))
 
             if projected_cost > STATUTORY_MAX_EGRESS_FEE:
                 if config.mode == EnforcementMode.STRICT:
-                    raise DataSovereigntyViolation(agent.provider, projected_cost, "SREN_COST_VIOLATION")
-                logger.warning(f"[{tx_id}] ADVISORY_BREACH|cost={projected_cost}")
+                    raise DataSovereigntyViolation(agent.provider, projected_cost, "SREN_BLOCK")
             
             return True
 
         except (InvalidOperation, ValueError, TypeError) as e:
-            logger.error(f"[{tx_id}] VALIDATION_CRITICAL: {str(e)}")
-            raise DataSovereigntyViolation("VALIDATION", Decimal("0.00"), "SECURITY_INPUT_REJECTION")
+            logger.error(f"[{tx_id}] VALIDATION_FAILURE: {str(e)}")
+            raise DataSovereigntyViolation("INTERNAL", Decimal("0.00"), "INPUT_REJECTION")
         except DataSovereigntyViolation:
             raise
         except Exception as e:
