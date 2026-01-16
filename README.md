@@ -4,19 +4,17 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Legal](https://img.shields.io/badge/Compliance-NOR%3AECOI2530768A-red)
 
-> **WARNING**
-> This middleware enforces strict adherence to **Article 27 of Law n° 2024-449** (SREN). Any cloud provider configuration detecting egress fees > 0.00€ will result in a hard blocking of UCP (Universal Commerce Protocol) agent transactions.
+**WARNING**
+This middleware enforces strict adherence to Article 27 of Law n° 2024-449 (SREN). Any cloud provider configuration detecting egress fees > 0.00€ will result in a hard blocking of UCP (Universal Commerce Protocol) agent transactions.
 
-## 🏗 Context
+## Context
+As Universal Commerce Protocol (UCP) becomes the standard for Agentic Commerce, organizations risk losing control over their data "signal" and incurring massive hidden costs through unmonitored egress.
 
-As **Universal Commerce Protocol (UCP)** becomes the standard for Agentic Commerce, organizations risk losing control over their data "signal" and incurring massive hidden costs through unmonitored egress.
-
-This repository implements a **Sovereign Interception Layer**. It ensures that your catalogue data is only exposed to Agents (Google, OpenAI) if:
-1. The infrastructure guarantees **Zero-Egress Fees** (as per Arrêté du 17/11/2025).
+This repository implements a Sovereign Interception Layer. It ensures that your catalogue data is only exposed to Agents (Google, OpenAI) if:
+1. The infrastructure guarantees Zero-Egress Fees (as per Arrêté du 17/11/2025).
 2. The Agent's intent provides a positive ROI vs. Data Leakage risk.
 
-## ⚡ Architecture
-
+## Architecture
 Using a Hexagonal Architecture to isolate Business Logic (French Law) from Infrastructure.
 
 ```mermaid
@@ -32,8 +30,3 @@ sequenceDiagram
     Firewall->>Policy: Validate against NOR:ECOI2530768A
     Policy-->>Firewall: VIOLATION DETECTED
     Firewall-->>GoogleAgent: 403 FORBIDDEN (Legal Reason: Data Sovereignty)
-
-## 🛡️ Anti-Bypass Mechanisms
-- **Zero-Size Detection:** Prevents agents from obfuscating data volume via fragmented null-payloads.
-- **Semantic Correction:** UCP 1.0 overhead is decoupled from actual data sovereignty valuation.
-- **Async Profiling:** Built-in latency monitoring to ensure zero-bottleneck in high-frequency trading.
