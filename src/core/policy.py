@@ -1,26 +1,29 @@
-from enum import Enum
 from decimal import Decimal
-from typing import Final
-from pydantic import BaseModel
+from enum import Enum
+from dataclasses import dataclass
+
+STATUTORY_MAX_EGRESS_FEE = Decimal("0.00")
+UCP_PROTOCOL_OVERHEAD = Decimal("0.98")
 
 class LegalReference(Enum):
-    SREN_ART_27 = "LOI_2024_449_ART_27"
-    ARRETE_EGRESS = "NOR_ECOI2530768A"
+    ARRETE_EGRESS = "NOR:ECOI2530768A"
+    LOI_SREN = "LOI n° 2024-449"
 
 class EnforcementMode(Enum):
-    STRICT = "BLOCK_ALL_FEES"
-    ADVISORY = "LOG_AND_PROCEED"
+    STRICT = "strict"
+    ADVISORY = "advisory"
 
-class SRENConfig(BaseModel):
+@dataclass
+class SRENConfig:
     mode: EnforcementMode = EnforcementMode.STRICT
     allow_value_added_services: bool = False
 
-STATUTORY_MAX_EGRESS_FEE: Final[Decimal] = Decimal("0.00")
-
 class DataSovereigntyViolation(Exception):
-    def __init__(self, provider: str, cost: Decimal, context: str):
-        self.message = (
-            f"[VIOLATION] Provider {provider} attempts to charge {cost} EUR/GB. "
-            f"Limit is {STATUTORY_MAX_EGRESS_FEE} EUR per {LegalReference.ARRETE_EGRESS.value}."
+    def __init__(self, provider: str, cost: Decimal, reason: str):
+        self.provider = provider
+        self.cost = cost
+        self.reason = reason
+        super().__init__(
+            f"[VIOLATION] {provider} attempts to charge {cost} EUR/GB. "
+            f"Reason: {reason}. Ref: {LegalReference.ARRETE_EGRESS.value}"
         )
-        super().__init__(self.message)
