@@ -32,3 +32,8 @@ sequenceDiagram
     Firewall->>Policy: Validate against NOR:ECOI2530768A
     Policy-->>Firewall: VIOLATION DETECTED
     Firewall-->>GoogleAgent: 403 FORBIDDEN (Legal Reason: Data Sovereignty)
+
+## 🛡️ Anti-Bypass Mechanisms
+- **Zero-Size Detection:** Prevents agents from obfuscating data volume via fragmented null-payloads.
+- **Semantic Correction:** UCP 1.0 overhead is decoupled from actual data sovereignty valuation.
+- **Async Profiling:** Built-in latency monitoring to ensure zero-bottleneck in high-frequency trading.
