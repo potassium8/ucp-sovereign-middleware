@@ -14,6 +14,11 @@ This repository implements a Sovereign Interception Layer. It ensures that your 
 1. The infrastructure guarantees Zero-Egress Fees (as per Arrêté du 17/11/2025).
 2. The Agent's intent provides a positive ROI vs. Data Leakage risk.
 
+## ⚖️ Standards & Compliance
+- **NIS2 Framework:** Structured logging with UUID transaction correlation for immutable audit trails.
+- **Resilience:** Circuit-breaker logic (Fail-Safe) on Cloud Billing ingestion to prevent data leakage during API outages.
+- **Precision:** Binary-to-decimal valuation using ISO/IEC 80000-13 standards.
+
 ## Architecture
 Using a Hexagonal Architecture to isolate Business Logic (French Law) from Infrastructure.
 
