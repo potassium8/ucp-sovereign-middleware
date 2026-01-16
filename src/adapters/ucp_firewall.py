@@ -9,22 +9,25 @@ logger = logging.getLogger("sovereign.firewall")
 
 class SRENComplianceFilter:
     def __init__(self, billing_service: BillingProvider):
-        
         self.billing_service = billing_service
         self.payload_correction_factor = Decimal("0.98")
 
     @monitor_latency
     async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig = SRENConfig()) -> bool:
         tx_id = tx.transaction_id
-        logger.info(f"[{tx_id}] AUDIT START | Agent: {agent.agent_id}")
+        logger.info(f"[{tx_id}] AUDIT_START | Agent: {agent.agent_id} | Provider: {agent.provider}")
 
         if tx.payload_size_mb <= 0:
-            logger.warning(f"[{tx_id}] FRAUD_ALERT: Zero-size payload detected")
+            logger.warning(f"[{tx_id}] FRAUD_ALERT: Zero or negative payload")
             if config.mode == EnforcementMode.STRICT:
-                raise DataSovereigntyViolation(agent.provider, Decimal("0.01"), "Bypass attempt")
+                raise DataSovereigntyViolation(agent.provider, Decimal("0.01"), "Null-payload bypass attempt")
 
-        current_rate = await self.billing_service.get_current_egress_rate()
-        
+        try:
+            current_rate = await self.billing_service.get_current_egress_rate()
+        except Exception as e:
+            logger.error(f"[{tx_id}] BILLING_SERVICE_ERROR: {str(e)}")
+            raise DataSovereigntyViolation(agent.provider, Decimal("0.00"), "Billing API failure - Safety block")
+
         size_gb = (Decimal(str(tx.payload_size_mb)) * self.payload_correction_factor) / Decimal("1024")
         projected_cost = size_gb * current_rate
 
