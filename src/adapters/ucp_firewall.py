@@ -11,9 +11,11 @@ class SRENComplianceFilter:
     def __init__(self, billing_service: BillingProvider):
         self.billing_service = billing_service
         self.payload_correction_factor = Decimal("0.98")
+        self.metrics = {"violations": 0, "total_audits": 0}
 
     @monitor_latency
     async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig = SRENConfig()) -> bool:
+        self.metrics["total_audits"] += 1
         tx_id = tx.transaction_id
         logger.info(f"[{tx_id}] AUDIT_START | Agent: {agent.agent_id} | Provider: {agent.provider}")
 
@@ -32,6 +34,7 @@ class SRENComplianceFilter:
         projected_cost = size_gb * current_rate
 
         if projected_cost > STATUTORY_MAX_EGRESS_FEE:
+            self.metrics["violations"] += 1
             msg = f"SREN_VIOLATION: {projected_cost} EUR exceeds limit (Rate: {current_rate}/GB)"
             if config.mode == EnforcementMode.STRICT:
                 logger.critical(f"[{tx_id}] {msg}")
