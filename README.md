@@ -26,12 +26,15 @@ Using a Hexagonal Architecture to isolate Business Logic (French Law) from Infra
 1. Why use Decimal instead of float?
 
 In most applications, floating-point errors are acceptable. In statutory compliance, they are not. Law NOR:ECOI2530768A mandates a 0.00€ limit. A 10^-9 rounding error could technically constitute a violation. We use decimal.Decimal with a precision of 28 to ensure our audit is legally irrefutable.
+
 2. What about the 1.02 overhead constant?
 
 Network billing is based on "on-wire" data. Sending 1GB of application payload results in ~1.02GB of billed traffic due to TCP/IP headers and TLS 1.3 encapsulation/padding. Our middleware integrates this 2% safety margin to detect threshold breaches before they are processed by the Cloud Provider's billing engine.
+
 3. Isn't Hexagonal Architecture overkill?
 
 No. Sovereignty requires provider independence. By decoupling the SREN Enforcement Logic from the Billing Adapters, the middleware remains Cloud-Agnostic. Moving from AWS to a Sovereign Cloud (Scaleway/OVH) requires zero changes to the core compliance engine.
+
 4. How do you handle API Latency?
 
 To prevent the middleware from becoming a bottleneck, the BillingProvider implements a TTL-based Cache. Billing rates are refreshed every 60 seconds, reducing the overhead per transaction to < 0.1ms while maintaining real-time protection.
