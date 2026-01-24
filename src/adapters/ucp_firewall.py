@@ -1,5 +1,6 @@
 import logging
 import decimal
+import hashlib
 from decimal import Decimal, InvalidOperation
 from src.core.policy import (
     DataSovereigntyViolation, 
@@ -12,6 +13,7 @@ from src.domain.models import UCPTransaction, AgentIdentity
 from src.ports.billing_provider import BillingProvider
 
 SREN_ENGINE_VERSION = "2026.1.7-platinum"
+HASH_ALGO = "sha256"
 logger = logging.getLogger("sovereign.firewall")
 
 class SRENComplianceFilter:
@@ -20,8 +22,9 @@ class SRENComplianceFilter:
 
     async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig = SRENConfig()) -> bool:
         tx_id = tx.transaction_id
+        secure_hash = hashlib.sha256(tx_id.encode()).hexdigest()[:12]
         
-        logger.info(f"AUDIT|v={SREN_ENGINE_VERSION}|tx_hash={hash(tx_id)}|prov={agent.provider}")
+        logger.info(f"AUDIT|v={SREN_ENGINE_VERSION}|tx_hash={HASH_ALGO}:{secure_hash}|prov={agent.provider}")
 
         try:
             with decimal.localcontext() as ctx:
