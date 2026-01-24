@@ -22,7 +22,8 @@ This repository implements a Sovereign Interception Layer. It ensures that your 
 ## Architecture
 Using a Hexagonal Architecture to isolate Business Logic (French Law) from Infrastructure.
 
-🛠 Technical Deep Dive & FAQ
+## Technical Deep Dive & FAQ
+
 1. Why use Decimal instead of float?
 
 In most applications, floating-point errors are acceptable. In statutory compliance, they are not. Law NOR:ECOI2530768A mandates a 0.00€ limit. A 10^-9 rounding error could technically constitute a violation. We use decimal.Decimal with a precision of 28 to ensure our audit is legally irrefutable.
