@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "SREN-Compliant Middleware for UCP Agents (Ref: NOR:ECOI2530768A)"
 authors = ["Armand-Pierre Fege <https://www.linkedin.com/in/armand-pierre-fege>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
