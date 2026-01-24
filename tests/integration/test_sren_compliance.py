@@ -25,5 +25,5 @@ async def test_it_blocks_google_ucp_if_egress_fees_exist():
     with pytest.raises(DataSovereigntyViolation) as excinfo:
         await firewall.audit_transaction(google_agent, tx)
     
-    assert "NOR_ECOI2530768A" in str(excinfo.value)
+    assert "NOR:ECOI2530768A" in str(excinfo.value)
     print(f"\n[SUCCESS] Law enforcement verified: {excinfo.value}")
