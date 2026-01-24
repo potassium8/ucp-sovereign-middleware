@@ -24,21 +24,33 @@ Using a Hexagonal Architecture to isolate Business Logic (French Law) from Infra
 
 ## Technical Deep Dive & FAQ
 
-1. Why use Decimal instead of float?
+#### 1. Why use Decimal instead of float?
 
 In most applications, floating-point errors are acceptable. In statutory compliance, they are not. Law NOR:ECOI2530768A mandates a 0.00€ limit. A 10^-9 rounding error could technically constitute a violation. We use decimal.Decimal with a precision of 28 to ensure our audit is legally irrefutable.
 
-2. What about the 1.02 overhead constant?
+#### 2. What about the 1.02 overhead constant?
 
 Network billing is based on "on-wire" data. Sending 1GB of application payload results in ~1.02GB of billed traffic due to TCP/IP headers and TLS 1.3 encapsulation/padding. Our middleware integrates this 2% safety margin to detect threshold breaches before they are processed by the Cloud Provider's billing engine.
 
-3. Isn't Hexagonal Architecture overkill?
+#### 3. Isn't Hexagonal Architecture overkill?
 
 No. Sovereignty requires provider independence. By decoupling the SREN Enforcement Logic from the Billing Adapters, the middleware remains Cloud-Agnostic. Moving from AWS to a Sovereign Cloud (Scaleway/OVH) requires zero changes to the core compliance engine.
 
-4. How do you handle API Latency?
+#### 4. How do you handle API Latency?
 
 To prevent the middleware from becoming a bottleneck, the BillingProvider implements a TTL-based Cache. Billing rates are refreshed every 60 seconds, reducing the overhead per transaction to < 0.1ms while maintaining real-time protection.
+
+#### 5. Why is the 1.02 overhead factor static? What about QUIC/HTTP3?
+
+We standardized on the **TCP worst-case scenario** (1.02). While modern protocols like HTTP/3 (QUIC) offer better header compression (QPACK), maintaining a 1.02 factor ensures a **Fail-Secure** posture. In sovereignty enforcement, over-estimating the cost risk is acceptable; under-estimating it constitutes a legal violation of Art. 27.
+
+#### 6. Does truncating SHA-256 to 12 chars create collision risks?
+
+A 12-character hex string offers $16^{12}$ (~281 trillion) combinations. For operational log correlation within a standard retention window (90 days), the collision probability is statistically negligible ($P < 10^{-15}$). Full-hash storage is reserved for Cold Storage archives to optimize immediate SIEM ingestion costs.
+
+#### 7. How do you handle Server Time Drift affecting the Billing Cache TTL?
+
+The middleware operates under the assumption that the host infrastructure complies with **SOC2 requirements** for NTP (Network Time Protocol) synchronization. Compensating for OS-level clock skew at the Application Layer is an anti-pattern that masks deeper infrastructure non-compliance.
 
 ```mermaid
 sequenceDiagram
