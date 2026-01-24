@@ -3,7 +3,7 @@ from enum import Enum
 from dataclasses import dataclass
 
 STATUTORY_MAX_EGRESS_FEE = Decimal("0.00")
-UCP_PROTOCOL_OVERHEAD = Decimal("0.98")
+UCP_PROTOCOL_OVERHEAD = Decimal("1.02")
 
 class LegalReference(Enum):
     ARRETE_EGRESS = "NOR:ECOI2530768A"
