@@ -42,14 +42,16 @@ To prevent the middleware from becoming a bottleneck, the BillingProvider implem
 
 ```mermaid
 sequenceDiagram
-    participant GoogleAgent as Google UCP Agent
+    participant Agent as Google UCP Agent
     participant Firewall as Sovereign Middleware
-    participant Policy as SREN Policy Engine
-    participant AWS as Cloud Billing
+    participant Policy as SREN Engine (v2026.1.7)
+    participant Billing as Billing Cache (TTL 60s)
 
-    GoogleAgent->>Firewall: Request Catalog Ingestion (Intent: BUY)
-    Firewall->>AWS: Check Egress Rate
-    AWS-->>Firewall: Rate = 0.09 EUR/GB
-    Firewall->>Policy: Validate against NOR:ECOI2530768A
-    Policy-->>Firewall: VIOLATION DETECTED
-    Firewall-->>GoogleAgent: 403 FORBIDDEN (Legal Reason: Data Sovereignty)
+    Agent->>Firewall: Request Catalog Ingestion
+    Firewall->>Billing: Get Cached Rate
+    Note over Billing: If expired, fetch from AWS API
+    Billing-->>Firewall: Rate = 0.09 EUR/GB
+    Firewall->>Policy: Audit (Payload * 1.02)
+    Note right of Policy: Precision Decimal(28)
+    Policy-->>Firewall: VIOLATION (SREN_BLOCK)
+    Firewall-->>Agent: 403 FORBIDDEN (Data Sovereignty Breach)
