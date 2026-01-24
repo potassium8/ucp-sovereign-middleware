@@ -1,5 +1,11 @@
 # UCP Sovereign Middleware & SREN Auditor
 
+## Deterministic SREN Enforcement Engine (Ref: NOR:ECOI2530768A)
+
+"Cloud billing latency is not a legal defense."
+
+This middleware implements a Zero-Tolerance Egress Policy for Universal Commerce Protocol (UCP) agents. Unlike standard budget alerts that trigger after the violation, this engine enforces Article 27 of Law n° 2024-449 at the transaction level. It uses Decimal(28) precision and physical network overhead analysis (1.02) to preemptively block any byte of data that incurs a fractional cent of cost. Code is Law.
+
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Legal](https://img.shields.io/badge/Compliance-NOR%3AECOI2530768A-red)
