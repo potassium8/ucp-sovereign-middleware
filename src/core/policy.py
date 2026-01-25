@@ -17,6 +17,9 @@ class EnforcementMode(Enum):
 class SRENConfig:
     mode: EnforcementMode = EnforcementMode.STRICT
     allow_value_added_services: bool = False
+    hash_algorithm: str = "sha256"
+    credit_balance: Decimal = Decimal("0.00")
+    network_overhead: Decimal = Decimal("1.02")
 
 class DataSovereigntyViolation(Exception):
     def __init__(self, provider: str, cost: Decimal, reason: str):
