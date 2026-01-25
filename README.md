@@ -94,6 +94,9 @@ We implement a **Zero-Trust Supply Chain** policy. All dependencies are pinned t
 **Q: Why perform a double integrity check (`check_alpha` & `check_beta`)?**
 This is a **Hardware Fault Injection (FI) countermeasure**. In high-security environments, an attacker could use voltage glitching or electromagnetic pulses to bypass a single `if` statement at the CPU level. By executing a redundant, independent verification, we make a successful hardware-level bypass statistically impossible without state-actor equipment. This aligns the middleware with **Mission-Critical / OIV** resilience standards.
 
+**Q: How do you protect the middleware against Python Runtime Tampering (Monkey Patching)?**
+While Python is a dynamic language, this middleware is designed to run in **Hardened Environments**. In production, we mandate the use of **Distroless immutable images** and signed bytecode. The redundant integrity checks (`check_alpha` & `check_beta`) are specifically calibrated to detect inconsistent states that would arise from runtime manipulation, ensuring that even if the interpreter is targeted, the divergence in execution flow triggers a `FAIL_SAFE_SHUTDOWN`.
+
 ---
 
 ```mermaid
