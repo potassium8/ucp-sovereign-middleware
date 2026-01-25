@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from decimal import Decimal
 
-INTERNAL_HMAC_KEY = b"SREN_GOV_ROOT_KEY_2026_V1"
+INTERNAL_HMAC_KEY = os.environ.get("SREN_SIGNING_KEY", "DEFAULT_FALLBACK_NOT_FOR_PROD").encode()
 
 STATUTORY_MAX_EGRESS_FEE = Decimal("0.00")
 UCP_PROTOCOL_OVERHEAD = Decimal("1.02")
