@@ -13,7 +13,7 @@ class EnforcementMode(Enum):
     STRICT = "strict"
     ADVISORY = "advisory"
 
-@dataclass
+@dataclass(frozen=True)
 class SRENConfig:
     mode: EnforcementMode = EnforcementMode.STRICT
     allow_value_added_services: bool = False

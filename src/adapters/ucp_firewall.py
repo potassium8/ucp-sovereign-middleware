@@ -1,6 +1,7 @@
 import logging
 import decimal
 import hashlib
+from importlib.metadata import version, PackageNotFoundError
 from decimal import Decimal, InvalidOperation
 from src.core.policy import (
     DataSovereigntyViolation, 
@@ -11,8 +12,14 @@ from src.core.policy import (
 from src.domain.models import UCPTransaction, AgentIdentity
 from src.ports.billing_provider import BillingProvider
 
-SREN_ENGINE_VERSION = "2026.1.8-obsidian"
+try:
+    SREN_ENGINE_VERSION = version("ucp-sovereign-middleware")
+except PackageNotFoundError:
+    SREN_ENGINE_VERSION = "0.0.0-dev"
+
 logger = logging.getLogger("sovereign.firewall")
+
+ALLOWED_HASH_ALGOS = {"sha256", "sha3_256", "sha3_512", "blake2b"}
 
 class SRENComplianceFilter:
     def __init__(self, billing_service: BillingProvider):
@@ -20,16 +27,23 @@ class SRENComplianceFilter:
 
     def _get_secure_hash(self, tx_id: str, algo: str) -> str:
         """
-        Crypto-Agility: Dynamically loads the hashing algorithm from config.
+        Loads hashing algo safely via allowlist validation.
         """
+        if algo not in ALLOWED_HASH_ALGOS:
+            logger.critical(f"SECURITY_ALERT: Algo '{algo}' not in allowlist. Fallback to sha256.")
+            algo = "sha256"
+
         try:
             hasher = getattr(hashlib, algo)
             return hasher(tx_id.encode()).hexdigest()[:12]
-        except (AttributeError, TypeError):
-            logger.critical(f"UNSUPPORTED_ALGO: {algo}. Fallback to sha256.")
+        except (AttributeError, TypeError) as e:
+            logger.error(f"CRYPTO_FAILURE: Algo {algo} instantiation failed: {e}")
             return hashlib.sha256(tx_id.encode()).hexdigest()[:12]
 
-    async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig = SRENConfig()) -> bool:
+    async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig | None = None) -> bool:
+        if config is None:
+            config = SRENConfig()
+
         tx_id = tx.transaction_id
         secure_hash = self._get_secure_hash(tx_id, config.hash_algorithm)
         
