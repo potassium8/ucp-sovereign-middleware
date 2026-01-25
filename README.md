@@ -63,6 +63,9 @@ If the billing provider is unreachable (Timeout/RST), the middleware denies the 
 **Q: Is the hashing logic GDPR compliant?**
 Yes. Transaction IDs are never logged in plain text. We use a **crypto-agile hashing mechanism** (SHA-256 by default) to anonymize PII (Personally Identifiable Information) before any logging occurs. Truncating to 12 characters avoids storage bloat while keeping collision probability negligible ($P < 10^{-15}$) for operational correlation.
 
+**Q: How does the middleware handle side-channel attacks (Spectre/Meltdown) or Hypervisor compromise?**
+The middleware operates at the **Application Layer (L7)**. While software-level hardening (Redundant Branching) mitigates logic bypasses and simple fault injections, it cannot unilaterally neutralize hardware-level vulnerabilities like speculative execution leaks. For high-stakes sovereign environments, this middleware is designed to be deployed on **SecNumCloud-certified Bare Metal** or within **Trusted Execution Environments (TEEs)** like Intel SGX. Its primary role is to ensure that the compliance breach never originates from the application logic itself and to provide a "Divergence Alert" (Audit Trail) if a hardware mismatch is detected.
+
 ### III. Performance & Architecture
 
 **Q: How do you handle high-latency Cloud APIs without blocking?**
