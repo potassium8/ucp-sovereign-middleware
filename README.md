@@ -29,7 +29,16 @@ This repository implements a **Sovereign Interception Layer**. It ensures that y
 - **Precision:** Binary-to-decimal valuation using ISO/IEC 80000-13 standards.
 
 ## Architecture
-We utilize a **Hexagonal Architecture** (Ports & Adapters) to strictly isolate the Business Logic (French Law/SREN) from Infrastructure concerns. This ensures that the enforcement policy remains immutable regardless of the underlying Cloud Provider (AWS, Azure, Scaleway).
+
+The system follows a **Hexagonal Architecture** (Ports & Adapters) pattern. This decoupled design ensures that the **Sovereign Business Logic** remains immutable and isolated from volatile infrastructure concerns.
+
+
+
+### Core Architectural Pillars
+
+* **⚖️ Legal Determinism (SREN Enforcement):** Unlike traditional post-billing alerts, this engine enforces Article 27 of Law n° 2024-449 at the transaction layer. By utilizing `Decimal(28)` precision and a static `1.02` network overhead safety factor, it guarantees a **Zero-Egress** policy that is legally irrefutable.
+* **🌍 Infrastructure Agnosticism:** The use of abstract Ports for Billing Providers allows the middleware to be **Cloud-Agnostic**. Transitioning from AWS/GCP to a Sovereign Cloud provider (Scaleway, OVHcloud) requires zero changes to the core compliance logic.
+* **🛡️ Mission-Critical Resilience:** Designed for OIV (Operators of Vital Importance) standards, the architecture incorporates multi-layered defense mechanisms, including **Atomic Snapshots** to prevent TOCTOU memory attacks and **Redundant Branching** to mitigate hardware-level fault injections.
 
 ---
 
