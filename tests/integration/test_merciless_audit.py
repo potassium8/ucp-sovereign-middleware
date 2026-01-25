@@ -2,14 +2,13 @@ import pytest
 import time
 from unittest.mock import Mock, patch, AsyncMock
 from decimal import Decimal
-from src.core.policy import DataSovereigntyViolation, EnforcementMode, SRENConfig
+from src.core.policy import DataSovereigntyViolation, EnforcementMode, create_secure_config
 from src.domain.models import AgentIdentity, UCPTransaction
 from src.adapters.ucp_firewall import SRENComplianceFilter
 from src.adapters.cloud.aws_billing import AWSBillingAdapter
 
 @pytest.mark.asyncio
 async def test_micro_transaction_compliance():
-    """Verifies that even negligible costs (0.0001 EUR) trigger enforcement."""
     mock_billing = AsyncMock(spec=AWSBillingAdapter)
     mock_billing.get_current_egress_rate.return_value = Decimal("0.0001") 
 
@@ -25,7 +24,6 @@ async def test_micro_transaction_compliance():
 
 @pytest.mark.asyncio
 async def test_negative_payload_injection():
-    """Ensures that invalid input (negative payload) is rejected without crashing."""
     billing = AsyncMock(spec=AWSBillingAdapter)
     firewall = SRENComplianceFilter(billing_service=billing)
     
@@ -39,23 +37,18 @@ async def test_negative_payload_injection():
 
 @pytest.mark.asyncio
 async def test_time_drift_cache_invalidation():
-    """Verifies that billing cache respects TTL and refreshes correctly."""
     billing = AWSBillingAdapter()
     
-    # 1. Force cache to 0.00
     with patch.object(billing, 'get_current_egress_rate', return_value=Decimal("0.00")):
         rate_t0 = await billing.get_current_egress_rate()
         assert rate_t0 == Decimal("0.00")
 
-    # 2. Simulate time drift > TTL (60s)
     with patch('time.time', return_value=time.time() + 61):
-        # Should fetch fresh value (mocked as 0.09 in adapter)
         rate_t1 = await billing.get_current_egress_rate()
         assert rate_t1 == Decimal("0.09")
 
 @pytest.mark.asyncio
 async def test_pii_logging_compliance(caplog):
-    """Ensures Transaction IDs are anonymized (SHA-256) in logs per GDPR/NIS2."""
     mock_billing = AsyncMock(spec=AWSBillingAdapter)
     mock_billing.get_current_egress_rate.return_value = Decimal("0.00")
     
