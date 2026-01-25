@@ -36,7 +36,7 @@ class SRENComplianceFilter:
             logger.error(f"CRYPTO_FAILURE: Algo {algo} instantiation failed: {e}")
             return hashlib.sha256(tx_id.encode()).hexdigest()[:12]
 
-async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig | None = None) -> bool:
+    async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, config: SRENConfig | None = None) -> bool:
         if config is None:
             config = create_secure_config()
 
@@ -50,6 +50,7 @@ async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, conf
         local_config = config
         tx_id = tx.transaction_id
         secure_hash = self._get_secure_hash(tx_id, local_config.hash_algorithm)
+        logger.info(f"AUDIT|v={SREN_ENGINE_VERSION}|tx_hash={local_config.hash_algorithm}:{secure_hash}|prov={agent.provider}")
 
         try:
             with decimal.localcontext() as ctx:
