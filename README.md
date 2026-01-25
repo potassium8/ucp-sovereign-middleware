@@ -65,6 +65,20 @@ No. Sovereignty requires provider independence. By decoupling the SREN Enforceme
 **Q: How do you handle Server Time Drift?**
 The middleware operates under the assumption that the host infrastructure complies with **SOC2 requirements** for NTP (Network Time Protocol) synchronization. Compensating for OS-level clock skew at the Application Layer is an anti-pattern that masks deeper infrastructure non-compliance.
 
+### IV. Advanced Security & Risk Mitigation
+
+**Q: Why is the HMAC key handled via environment variables?**
+Hardcoding secrets is a systemic failure. The middleware is designed for dynamic injection via **KMS (Key Management Service)** or **HashiCorp Vault**. By decoupling the key from the source code, we enable automated key rotation policies (e.g., every 24h), reducing the window of opportunity for entropy-based attacks or brute-force attempts.
+
+**Q: How do you mitigate TOCTOU (Time-of-Check to Time-of-Use) memory attacks?**
+To prevent an attacker from mutating the configuration in RAM between the signature check and the cost calculation, the middleware implements an **Atomic Snapshot** pattern. Immediately after verification, a local reference is created within the coroutine stack, isolating the operational parameters from external process interference.
+
+**Q: Doesn't the "Strict Enforcement" mode create a Risk of Legal DoS?**
+Yes. An attacker could flood the system with transactions designed to trigger egress fees, effectively paralyzing the service. However, under Law NOR:ECOI2530768A, the risk of economic paralysis is deemed inferior to the risk of **sovereignty breach**. We prioritize "Fail-Secure" (blocking) over "Fail-Open" (leaking), assuming that upstream Rate-Limiting (Layer 7) handles volumetric protection.
+
+**Q: How is the Supply Chain protected against malicious dependencies?**
+We implement a **Zero-Trust Supply Chain** policy. All dependencies are pinned to exact versions (no `^` or `~`). The CI/CD pipeline integrates `bandit` for static analysis and `safety` for CVE scanning. This ensures that the middleware is built on a verified, immutable foundation of third-party libraries.
+
 ---
 
 ```mermaid
