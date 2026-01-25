@@ -40,15 +40,41 @@ async def audit_transaction(self, agent: AgentIdentity, tx: UCPTransaction, conf
         if config is None:
             config = create_secure_config()
 
-        if not config.verify_integrity():
-            logger.critical("TAMPERING_DETECTED|Config signature mismatch!")
+        check_alpha = config.verify_integrity()
+        check_beta = config.verify_integrity()
+
+        if (check_alpha is not True) or (check_beta is not True):
+            logger.critical("HARDWARE_FAULT_OR_TAMPERING|Integrity check mismatch detected.")
             raise DataSovereigntyViolation("INTERNAL", Decimal("0.00"), "INTEGRITY_COMPROMISE")
 
-        local_config = config 
+        local_config = config
         tx_id = tx.transaction_id
         secure_hash = self._get_secure_hash(tx_id, local_config.hash_algorithm)
-        
+
         try:
+            with decimal.localcontext() as ctx:
+                ctx.prec = 28
+                ctx.rounding = decimal.ROUND_HALF_UP
+                
+                if tx.payload_size_mb < 0:
+                    raise ValueError("NEGATIVE_PAYLOAD")
+
+                current_rate = await self.billing_service.get_current_egress_rate()
+                
+                size_gb = (tx.payload_size_mb * local_config.network_overhead) / Decimal("1024")
+                projected_cost = (size_gb * current_rate).quantize(Decimal("0.0001"))
+
+            effective_cost = max(Decimal("0.00"), projected_cost - local_config.credit_balance)
+
+            if effective_cost > STATUTORY_MAX_EGRESS_FEE:
+                logger.warning(
+                    f"SOVEREIGN_SAVINGS|amount_eur={effective_cost}|provider={agent.provider}|"
+                    f"reason=SREN_PREVENTED|ref=NOR:ECOI2530768A"
+                )
+                
+                if local_config.mode == EnforcementMode.STRICT:
+                    raise DataSovereigntyViolation(agent.provider, effective_cost, "SREN_BLOCK")
+            
             return True
 
         except (InvalidOperation, ValueError, TypeError) as e:
