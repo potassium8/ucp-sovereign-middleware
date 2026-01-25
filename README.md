@@ -79,6 +79,9 @@ Yes. An attacker could flood the system with transactions designed to trigger eg
 **Q: How is the Supply Chain protected against malicious dependencies?**
 We implement a **Zero-Trust Supply Chain** policy. All dependencies are pinned to exact versions (no `^` or `~`). The CI/CD pipeline integrates `bandit` for static analysis and `safety` for CVE scanning. This ensures that the middleware is built on a verified, immutable foundation of third-party libraries.
 
+**Q: Why perform a double integrity check (`check_alpha` & `check_beta`)?**
+This is a **Hardware Fault Injection (FI) countermeasure**. In high-security environments, an attacker could use voltage glitching or electromagnetic pulses to bypass a single `if` statement at the CPU level. By executing a redundant, independent verification, we make a successful hardware-level bypass statistically impossible without state-actor equipment. This aligns the middleware with **Mission-Critical / OIV** resilience standards.
+
 ---
 
 ```mermaid
