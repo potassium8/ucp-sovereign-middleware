@@ -159,3 +159,4 @@ sequenceDiagram
     Policy-->>Firewall: VIOLATION (SREN_BLOCK)
     Firewall-->>Agent: 403 FORBIDDEN (Data Sovereignty Breach)
 `
+```
