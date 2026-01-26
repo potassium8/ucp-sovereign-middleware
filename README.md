@@ -16,6 +16,20 @@ This middleware enforces strict adherence to Article 27 of Law n° 2024-449 (SRE
 
 ---
 
+## ⚡ Quick Start (Deterministic Build)
+
+Audit the sovereign engine in your local environment. This command sequence builds the **Distroless** image, enforces the **Read-Only** filesystem, and initiates the monitoring loop.
+Result: The middleware will start in a hardened container (Mem: ~18MB). Check status with: `podman stats ucp-bunker --no-stream`
+
+```bash
+# Clone and Deploy the Bunker (Requires Podman or Docker)
+git clone [https://github.com/ton-profil/ucp-sovereign-middleware.git](https://github.com/ton-profil/ucp-sovereign-middleware.git)
+cd ucp-sovereign-middleware
+chmod +x deploy.sh && ./deploy.sh
+
+```
+---
+
 ## Context
 As Universal Commerce Protocol (UCP) becomes the standard for Agentic Commerce, organizations risk losing control over their data "signal" and incurring massive hidden costs through unmonitored egress.
 
@@ -40,6 +54,13 @@ The system follows a **Hexagonal Architecture** (Ports & Adapters) pattern. This
 * **⚖️ Legal Determinism (SREN Enforcement):** Unlike traditional post-billing alerts, this engine enforces Article 27 of Law n° 2024-449 at the transaction layer. By utilizing `Decimal(28)` precision and a static `1.02` network overhead safety factor, it guarantees a **Zero-Egress** policy that is legally irrefutable.
 * **🌍 Infrastructure Agnosticism:** The use of abstract Ports for Billing Providers allows the middleware to be **Cloud-Agnostic**. Transitioning from AWS/GCP to a Sovereign Cloud provider (Scaleway, OVHcloud) requires zero changes to the core compliance logic.
 * **🛡️ Mission-Critical Resilience:** Designed for OIV (Operators of Vital Importance) standards, the architecture incorporates multi-layered defense mechanisms, including **Atomic Snapshots** to prevent TOCTOU memory attacks and **Redundant Branching** to mitigate hardware-level fault injections.
+###Fail-Secure Architecture (Default Deny)
+
+Unlike standard "Fail-Safe" systems that prioritize availability during a crash (risking data leaks), this middleware is engineered as **Fail-Secure**:
+
+* **Ambiguity = Block:** If the policy engine encounters an unknown state or a parsing error, the traffic is strictly dropped.
+* **Runtime Crash = Sever:** If the Python runtime stops, the container exits immediately. Since the container acts as the gateway, egress is physically severed.
+* **Philosophy:** We prefer a service interruption over a sovereignty violation.
 
 ---
 
@@ -136,3 +157,4 @@ sequenceDiagram
     Note right of Policy: Precision Decimal(28) + HMAC Check
     Policy-->>Firewall: VIOLATION (SREN_BLOCK)
     Firewall-->>Agent: 403 FORBIDDEN (Data Sovereignty Breach)
+`
