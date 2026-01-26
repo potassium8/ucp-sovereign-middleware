@@ -23,7 +23,7 @@ Result: The middleware will start in a hardened container (Mem: ~18MB). Check st
 
 ```bash
 # Clone and Deploy the Bunker (Requires Podman or Docker)
-git clone [https://github.com/ton-profil/ucp-sovereign-middleware.git](https://github.com/ton-profil/ucp-sovereign-middleware.git)
+git clone [https://github.com/potassium8/ucp-sovereign-middleware.git](https://github.com/potassium8/ucp-sovereign-middleware.git)
 cd ucp-sovereign-middleware
 chmod +x deploy.sh && ./deploy.sh
 
