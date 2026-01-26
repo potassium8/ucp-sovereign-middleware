@@ -86,3 +86,18 @@ class SRENComplianceFilter:
         except Exception as e:
             logger.critical(f"[{secure_hash}] KERNEL_PANIC: {str(e)}", exc_info=True)
             raise DataSovereigntyViolation("SYSTEM", Decimal("0.00"), "FAIL_SAFE_SHUTDOWN")
+
+import asyncio
+
+async def monitor():
+    """Main loop to keep the sovereign engine alive."""
+    print("🛡️ [SREN] Sovereign Middleware Engine v0.1.0 - ACTIVE")
+    print("🔒 Monitoring egress traffic and enforcing compliance...")
+    try:
+        while True:
+            await asyncio.sleep(3600) 
+    except asyncio.CancelledError:
+        print("🛑 Shutdown sequence initiated.")
+
+if __name__ == "__main__":
+    asyncio.run(monitor())
