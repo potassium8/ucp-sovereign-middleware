@@ -54,7 +54,8 @@ The system follows a **Hexagonal Architecture** (Ports & Adapters) pattern. This
 * **⚖️ Legal Determinism (SREN Enforcement):** Unlike traditional post-billing alerts, this engine enforces Article 27 of Law n° 2024-449 at the transaction layer. By utilizing `Decimal(28)` precision and a static `1.02` network overhead safety factor, it guarantees a **Zero-Egress** policy that is legally irrefutable.
 * **🌍 Infrastructure Agnosticism:** The use of abstract Ports for Billing Providers allows the middleware to be **Cloud-Agnostic**. Transitioning from AWS/GCP to a Sovereign Cloud provider (Scaleway, OVHcloud) requires zero changes to the core compliance logic.
 * **🛡️ Mission-Critical Resilience:** Designed for OIV (Operators of Vital Importance) standards, the architecture incorporates multi-layered defense mechanisms, including **Atomic Snapshots** to prevent TOCTOU memory attacks and **Redundant Branching** to mitigate hardware-level fault injections.
-###Fail-Secure Architecture (Default Deny)
+
+### Fail-Secure Architecture (Default Deny)
 
 Unlike standard "Fail-Safe" systems that prioritize availability during a crash (risking data leaks), this middleware is engineered as **Fail-Secure**:
 
