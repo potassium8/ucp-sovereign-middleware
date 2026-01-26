@@ -152,11 +152,9 @@ sequenceDiagram
 
     Agent->>Firewall: Request Catalog Ingestion
     Firewall->>Billing: Get Cached Rate
-    Note over Billing: If expired, fetch from AWS API
+    Note over Billing: If expired, fetch from API
     Billing-->>Firewall: Rate = 0.09 EUR/GB
     Firewall->>Policy: Audit (Payload * 1.02)
-    Note right of Policy: Precision Decimal(28) + HMAC Check
+    Note right of Policy: Precision Decimal(28) + HMAC
     Policy-->>Firewall: VIOLATION (SREN_BLOCK)
-    Firewall-->>Agent: 403 FORBIDDEN (Data Sovereignty Breach)
-`
-```
+    Firewall-->>Agent: 403 FORBIDDEN (Sovereignty Breach)
